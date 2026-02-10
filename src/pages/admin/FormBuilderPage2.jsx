@@ -25,13 +25,14 @@ import {
 } from "/src/components/ui/input"
 
 const formSchema = z.object({
-    title: z.string().min(1),
-    type: z.string(),
-    inputTitle: z.string().min(1),
-    inputPlaceholder: z.string().min(1),
-    required: z.boolean(),
-    minLength: z.number().min(0),
-    maxLength: z.number().min(0)
+    title: z.string().min(2),
+    type: z.string().nonempty("Invalid : must select a type from the list above."),
+    inputTitle: z.string().min(2),
+    inputPlaceholder: z.string().min(2).optional(),
+    required: z.boolean().optional(),
+    minLength: z.number().min(0).optional(),
+    maxLength: z.number().min(0).optional(),
+    options: z.array(z.object({title: z.string(), value: z.string()})).optional()
 });
 
 export default function MyForm() {
@@ -44,15 +45,15 @@ export default function MyForm() {
             required: false,
             minLength: 0,
             maxLength: 0,
+            options: [{title: '', value: ''}]
         },
         onSubmit: async ({ value }) => {
             try {
+                console.log("============= Submitting =============")
                 console.log(value);
-                toast(
-                    <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                        <code className="text-white">{JSON.stringify(value, null, 2)}</code>
-                    </pre>
-                );
+                toast(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+                //         <code className="text-white">{JSON.stringify(value, null, 2)}</code>
+                //     </pre>)
             } catch (error) {
                 console.error("Form submission error", error);
                 toast.error("Failed to submit the form. Please try again.");

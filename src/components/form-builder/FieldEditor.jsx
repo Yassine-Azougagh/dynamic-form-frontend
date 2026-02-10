@@ -1,4 +1,6 @@
+import { useState } from "react";
 import ConditionsEditor from "./ConditionsEditor";
+import OptionsEditor from "./OptionsEditor";
 import {
     Field,
     FieldError,
@@ -24,6 +26,7 @@ const FIELD_TYPES = [
     {label: "checkbox", value: "checkbox"}];
 
 export default function FieldEditor({ form, field, onChange, onDelete, index }) {
+    const [inputType, setInputType] = useState('');
     const update = (key, value) => {
         onChange({ ...field, [key]: value });
     };
@@ -57,7 +60,10 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
                     <Select
                       name={field.name}
                       value={field.state.value}
-                      onValueChange={field.handleChange}
+                      onValueChange={(v) => {
+                        setInputType(v);
+                        field.handleChange(v)
+                      }}
                     >
                       <SelectTrigger
                         id="form-tanstack-select-language"
@@ -137,6 +143,9 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
                         />
             </div>
 
+            {   inputType != null && inputType !== '' && !['text', 'number'].includes(inputType)  && 
+                <OptionsEditor form={form} />
+            }
             <ConditionsEditor
                 form={form}
                 conditions={field.conditions}

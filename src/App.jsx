@@ -1,6 +1,7 @@
 
 import { Outlet } from "react-router";
 import './App.css';
+import { Toaster } from "@/components/ui/sonner"
 
 function App() {
 
@@ -17,6 +18,7 @@ function App() {
                 <div className="relative pt-20 px-10">
                     <Outlet/>
                 </div>
+                <Toaster />
           </div>
       </>
   )
