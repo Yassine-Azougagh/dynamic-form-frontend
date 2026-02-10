@@ -116,7 +116,8 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
                                 )
                             }}
                         />
-            <form.Field
+            <div className="col-span-2">
+                <form.Field
                             name="inputPlaceholder"
                             children={(field) => {
                                 const isInvalid =
@@ -141,6 +142,7 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
                                 )
                             }}
                         />
+            </div>
             </div>
 
             {   inputType != null && inputType !== '' && !['text', 'number'].includes(inputType)  && 
