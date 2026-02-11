@@ -25,11 +25,9 @@ const FIELD_TYPES = [
     {label: "radio", value: "radio"}, 
     {label: "checkbox", value: "checkbox"}];
 
-export default function FieldEditor({ form, field, onChange, onDelete, index }) {
+export default function FieldEditor({ form, field, onDelete, index }) {
     const [inputType, setInputType] = useState('');
-    const update = (key, value) => {
-        onChange({ ...field, [key]: value });
-    };
+
 
     return (
         <div className="bg-white rounded-xl shadow p-6">
@@ -49,8 +47,7 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
 
             {/* Grid */}
             <div className="grid grid-cols-2 gap-4">
-                <form.Field
-              name="type"
+                <form.Field key={`input-type-${index}`} name={`fields[${index}].inputType`}
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
@@ -91,8 +88,7 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
                 )
               }}
             />            
-            <form.Field
-                            name="inputTitle"
+            <form.Field key={`input-title-${index}`} name={`fields[${index}].inputTitle`}
                             children={(field) => {
                                 const isInvalid =
                                     field.state.meta.isTouched && !field.state.meta.isValid
@@ -117,8 +113,7 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
                             }}
                         />
             <div className="col-span-2">
-                <form.Field
-                            name="inputPlaceholder"
+                <form.Field key={`input-placeholder-${index}`} name={`fields[${index}].inputPlaceholder`}
                             children={(field) => {
                                 const isInvalid =
                                     field.state.meta.isTouched && !field.state.meta.isValid
@@ -146,12 +141,11 @@ export default function FieldEditor({ form, field, onChange, onDelete, index }) 
             </div>
 
             {   inputType != null && inputType !== '' && !['text', 'number'].includes(inputType)  && 
-                <OptionsEditor form={form} />
+                <OptionsEditor form={form}  index={index}/>
             }
             <ConditionsEditor
                 form={form}
-                conditions={field.conditions}
-                onChange={(conds) => update("conditions", conds)}
+                index={index}
             />
         </div>
     );

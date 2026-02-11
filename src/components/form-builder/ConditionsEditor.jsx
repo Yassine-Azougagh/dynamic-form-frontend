@@ -54,12 +54,10 @@ const CONDITIONS = [
         type: 'number',
     },
 ]
-export default function ConditionsEditor({ form, conditions, onChange }) {
+export default function ConditionsEditor({ form, index }) {
 
     const [conditionsTable, setConditionsTable] = useState([]);
-    const update = (key, value) => {
-        onChange({ ...conditions, [key]: value });
-    };
+
     useEffect(()=>{
         if(conditionsTable.length === 0)
             setConditionsTable(CONDITIONS)
@@ -97,12 +95,12 @@ export default function ConditionsEditor({ form, conditions, onChange }) {
                 <TableBody>
                     {
                         conditionsTable && conditionsTable.length > 0 ?
-                         conditionsTable.map(condition => (
+                         conditionsTable.map((condition) => (
                             (<TableRow key={condition.id}>
                                 <TableCell className="font-medium">{condition.title}</TableCell>
                                 <TableCell>{
                                     <form.Field
-                                        name={condition.name}
+                                        name={`fields[${index}].${condition.name}`}
                                         children={(field) => {
                                             const isInvalid =
                                                 field.state.meta.isTouched && !field.state.meta.isValid

@@ -4,7 +4,6 @@ import { FieldGroup } from "@/components/ui/field"
 import {
     useForm
 } from "@tanstack/react-form"
-import { useState } from "react"
 import {
     toast
 } from "sonner"
@@ -26,30 +25,39 @@ import {
 
 const formSchema = z.object({
     title: z.string().min(2),
-    type: z.string().nonempty("Invalid : must select a type from the list above."),
-    inputTitle: z.string().min(2),
-    inputPlaceholder: z.string().min(2).optional(),
-    required: z.boolean().optional(),
-    minLength: z.number().min(0).optional(),
-    maxLength: z.number().min(0).optional(),
-    options: z.array(z.object({title: z.string(), value: z.string()})).optional()
+    fields: z.array(
+        z.object({
+            inputType: z.string().nonempty("Invalid : must select a type from the list above."),
+            inputTitle: z.string().min(2),
+            inputPlaceholder: z.string().min(2).optional(),
+            required: z.boolean().optional(),
+            minLength: z.number().min(0).optional(),
+            maxLength: z.number().min(0).optional(),
+            options: z.array(z.object({title: z.string(), value: z.string()})).optional()
+        })
+    )
 });
 
 export default function MyForm() {
     const form = useForm({
         defaultValues: {
             title: "",
-            type: "",
-            inputTitle: "",
-            inputPlaceholder: "",
-            required: false,
-            minLength: 0,
-            maxLength: 0,
-            options: [{title: '', value: ''}]
+            fields: [
+                {
+                    inputType: "",
+                    inputTitle: "",
+                    inputPlaceholder: "",
+                    required: false,
+                    minLength: 0,
+                    maxLength: 0,
+                    options: [{title: '', value: ''}]
+                }
+            ]
         },
         onSubmit: async ({ value }) => {
             try {
                 console.log("============= Submitting =============")
+                // value.fields.map(field => field.id = crypto.randomUUID())
                 console.log(value);
                 toast(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
                 //         <code className="text-white">{JSON.stringify(value, null, 2)}</code>
@@ -64,34 +72,22 @@ export default function MyForm() {
         }
     })
 
-    const [fields, setFields] = useState([]);
 
     const addField = () => {
-        setFields([
-            ...fields,
-            {
-                type: "text",
-                title: "",
-                placeholder: "",
+        form.setFieldValue('fields', old => [...old, {
+                inputType: "",
+                inputTitle: "",
+                inputPlaceholder: "",
                 options: [],
-                conditions: {
-                    required: false,
-                    minLength: 0,
-                    maxLength: 0
-                }
-            }
-        ]);
-    };
-
-    const updateField = (index, updatedField) => {
-        const copy = [...fields];
-        copy[index] = updatedField;
-        setFields(copy);
+                required: false,
+                minLength: 0,
+                maxLength: 0
+        }])
     };
 
     const removeField = (index) => {
-        setFields(fields.filter((_, i) => i !== index));
-    };
+        form.removeFieldValue('fields', index)
+    }
 
     return (
 
@@ -144,16 +140,30 @@ export default function MyForm() {
                         />
                         {/* Fields Section */}
                         <div className="space-y-4">
-                            {fields.map((field, index) => (
-                                <FieldEditor
-                                    form={form}
-                                    key={index}
-                                    index={index}
-                                    field={field}
-                                    onChange={(updated) => updateField(index, updated)}
-                                    onDelete={() => removeField(index)}
-                                />
-                            ))}
+                            <form.Field name="fields" mode="array">
+                            {(field) => {
+                                return (
+                                    <>
+                                        {field.state.value.length > 0 ?
+                                            field.state.value.map((_, i) => {
+                                                return (
+                                        <FieldEditor
+                                            form={form}
+                                            key={i}
+                                            index={i}
+                                            field={field}
+                                            onDelete={removeField}
+                                        />
+                                                )
+                                            }):
+                                            (
+                                                <div>No field is specified</div>
+                                            )
+                                        }
+                                    </>
+                                )
+                            }}
+                            </form.Field>
                         </div>
                         <Button type="submit">Submit</Button>
                     </FieldGroup>

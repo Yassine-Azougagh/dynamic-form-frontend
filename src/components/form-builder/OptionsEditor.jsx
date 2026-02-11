@@ -19,11 +19,11 @@ import {
 import {
     Input
 } from "/src/components/ui/input";
-export default function OptionsEditor({ form}) {
+export default function OptionsEditor({ form, index}) {
 
     return (
         <div className="mt-3 border-t pt-3">
-            <form.Field name="options" mode="array">
+            <form.Field key={`option-${index}`} name={`fields[${index}].options`} mode="array">
                 {(field) => {
                     return (
                         <>
@@ -53,7 +53,7 @@ export default function OptionsEditor({ form}) {
                                             return (
                                                 <TableRow key={i}>
                                                     <TableCell>
-                                                        <form.Field key={i} name={`options[${i}].title`}>
+                                                        <form.Field key={i} name={`fields[${index}].options[${i}].title`}>
                                                             {(subField) => {
                                                                 const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
                                                                 return (
@@ -72,7 +72,7 @@ export default function OptionsEditor({ form}) {
                                                         </form.Field>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <form.Field key={i} name={`options[${i}].value`}>
+                                                        <form.Field key={i} name={`fields[${index}].options[${i}].value`}>
                                                             {(subField) => {
                                                                 const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
                                                                 return (
