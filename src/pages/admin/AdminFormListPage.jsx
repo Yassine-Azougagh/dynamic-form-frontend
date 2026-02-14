@@ -164,7 +164,7 @@ export default function AdminFormListPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tableData.map(form => 
+                    {forms.map(form => 
                         (<TableRow key={form.id}>
                             <TableCell className="font-medium">{form.title}</TableCell>
                             <TableCell>{form.createdAt}</TableCell>

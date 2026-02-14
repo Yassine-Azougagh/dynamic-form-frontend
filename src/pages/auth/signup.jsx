@@ -11,24 +11,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { login } from "@/services/auth.service";
+import { Toaster } from "@/components/ui/sonner";
+import { signup } from "@/services/auth.service";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { z } from "zod";
 import CUSTOM_LOGO from '/icon.png';
+
+
 const formSchema = z.object({
   username: z.email(),
   password: z.string().min(8, "Password must be at least 8 characters long"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters long"),
 });
 
-const Login = () => {
+const Signup = () => {
   const navigate = useNavigate()
 
   const form = useForm({
     defaultValues: {
       username: "",
       password: "",
+      confirmPassword: ""
     },
     resolver: zodResolver(formSchema),
   });
@@ -36,11 +42,19 @@ const Login = () => {
   const onSubmit = async (data) => {
     console.log(data);
 
-    const res = await login(data.username, data.password)
+    if(data.password !== data.confirmPassword)
+      return;
 
-    if(res)
-      navigate("/")
+    const res = await signup(data.username, data.password)
 
+
+    if(res.success){
+      console.log("signup repsonse : ", res);
+      
+      navigate("/login", {replace: true})
+    }else{
+      toast.error(res.message, {style: {'color': 'red'}})
+    }
   };
 
   return (
@@ -49,7 +63,7 @@ const Login = () => {
         <div className="m-auto flex w-full max-w-xs flex-col items-center">
           <Logo className="h-30 w-30" src={CUSTOM_LOGO} />
           <p className="mt-2 font-semibold text-xl tracking-tight mb-5">
-            Log in 
+            Sign up
           </p>
 
           <Form {...form}>
@@ -78,30 +92,29 @@ const Login = () => {
                     <FormMessage />
                   </FormItem>
                 )} />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm password</FormLabel>
+                    <FormControl>
+                      <Input className="w-full" placeholder="confirm password" type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               <Button className="mt-4 w-full" type="submit">
-                Connexion
+                Create Account
               </Button>
             </form>
           </Form>
-
-          <div className="mt-5 space-y-5">
-            <a
-              className="block text-center text-muted-foreground text-sm underline"
-              href="#">
-              Forgot your password?
-            </a>
-            <p className="text-center text-sm">
-              Don&apos;t have an account?
-              <a className="ml-1 text-muted-foreground underline" href="/signup">
-                Create account
-              </a>
-            </p>
-          </div>
         </div>
         <div className="hidden rounded-lg border bg-muted lg:block overflow-clip" >
           <img src="/images/panel.jpg" alt="panel" className="h-full"/>
         </div>
       </div>
+      <Toaster/>
     </div>
   );
 };
@@ -137,4 +150,4 @@ const GoogleLogo = () => (
   </svg>
 );
 
-export default Login;
+export default Signup;

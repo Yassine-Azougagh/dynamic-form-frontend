@@ -19,11 +19,14 @@ import {
 import {
     Input
 } from "/src/components/ui/input";
-export default function OptionsEditor({ form, index}) {
+export default function OptionsEditor({ form, index }) {
 
+    const addOption = (index) => {
+        form.setFieldValue(`schemas[${index}].options`, old => [...old, { title: '', value: '' }])
+    };
     return (
         <div className="mt-3 border-t pt-3">
-            <form.Field key={`option-${index}`} name={`fields[${index}].options`} mode="array">
+            <form.Field key={`option-${index}`} name={`schemas[${index}].options`} mode="array">
                 {(field) => {
                     return (
                         <>
@@ -33,7 +36,7 @@ export default function OptionsEditor({ form, index}) {
                                     Options
                                 </h3>
                                 <button
-                                    onClick={() => field.pushValue({ title: '', value: '' })}
+                                    onClick={addOption}
                                     className="text-grey-500 hover:text-black-700"
                                 >
                                     Add
@@ -53,7 +56,7 @@ export default function OptionsEditor({ form, index}) {
                                             return (
                                                 <TableRow key={i}>
                                                     <TableCell>
-                                                        <form.Field key={i} name={`fields[${index}].options[${i}].title`}>
+                                                        <form.Field key={i} name={`schemas[${index}].options[${i}].title`}>
                                                             {(subField) => {
                                                                 const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
                                                                 return (
@@ -72,7 +75,7 @@ export default function OptionsEditor({ form, index}) {
                                                         </form.Field>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <form.Field key={i} name={`fields[${index}].options[${i}].value`}>
+                                                        <form.Field key={i} name={`schemas[${index}].options[${i}].value`}>
                                                             {(subField) => {
                                                                 const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
                                                                 return (

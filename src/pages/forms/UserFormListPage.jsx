@@ -13,10 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getForms } from "@/services/form.service";
 import { Edit, MoreHorizontalIcon, Plus, View } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { getForms } from "../../services/form.service";
 
 
 const tableData = [
@@ -161,7 +161,7 @@ export default function UserFormListPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tableData.map(form => 
+                    {forms.map(form => 
                         (<TableRow key={form.id}>
                             <TableCell className="font-medium">{form.title}</TableCell>
                             <TableCell>{form.createdAt}</TableCell>

@@ -16,7 +16,7 @@ import {
 import { MoreHorizontalIcon, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { getForms } from "../../services/form.service";
+import { getFormById } from "../../services/form.service";
 
 
 const tableData = [
@@ -131,12 +131,12 @@ const tableData = [
 
 
 export default function FormView() {
-    const [forms, setForms] = useState([]);
+    const [form, setForm] = useState(null);
     const navigate = useNavigate();
     const { id } = useParams();
 
     useEffect(() => {
-        getForms().then(setForms);
+        getFormById(id).then(setForm);
     }, []);
 
     const formObject = tableData.find(data => data.id === id)
@@ -164,7 +164,7 @@ export default function FormView() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {formObject.schema.map((schema, idx) => 
+                    {form  && form.schema.map((schema, idx) => 
                         (<TableRow key={idx}>
                             <TableCell >{schema.title}</TableCell>
                             <TableCell className="font-medium">{schema.type}</TableCell>
@@ -180,7 +180,7 @@ export default function FormView() {
                                 <ul >
                                     {
                                         schema.options.map((option) => (
-                                            <li className="list-disc">{option}</li>
+                                            <li className="list-disc">{option.title}</li>
                                         ))
                                     }
                                 </ul>

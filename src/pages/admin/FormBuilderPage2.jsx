@@ -22,17 +22,20 @@ import {
 import {
     Input
 } from "/src/components/ui/input"
+import { createForm } from "@/services/form.service"
 
 const formSchema = z.object({
     title: z.string().min(2),
-    fields: z.array(
+    schemas: z.array(
         z.object({
-            inputType: z.string().nonempty("Invalid : must select a type from the list above."),
-            inputTitle: z.string().min(2),
-            inputPlaceholder: z.string().min(2).optional(),
-            required: z.boolean().optional(),
-            minLength: z.number().min(0).optional(),
-            maxLength: z.number().min(0).optional(),
+            type: z.string().nonempty("Invalid : must select a type from the list above."),
+            title: z.string().min(2),
+            placeholder: z.string().min(2).optional(),
+            conditions: z.object({
+                required: z.boolean().optional(),
+                minLength: z.number().min(0).optional(),
+                maxLength: z.number().min(0).optional(),
+            }),
             options: z.array(z.object({title: z.string(), value: z.string()})).optional()
         })
     )
@@ -42,14 +45,16 @@ export default function MyForm() {
     const form = useForm({
         defaultValues: {
             title: "",
-            fields: [
+            schemas: [
                 {
-                    inputType: "",
-                    inputTitle: "",
-                    inputPlaceholder: "",
-                    required: false,
-                    minLength: 0,
-                    maxLength: 0,
+                    type: "",
+                    title: "",
+                    placeholder: "",
+                    conditions: {
+                        required: false,
+                        minLength: 0,
+                        maxLength: 0,
+                    },
                     options: [{title: '', value: ''}]
                 }
             ]
@@ -62,6 +67,9 @@ export default function MyForm() {
                 toast(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
                 //         <code className="text-white">{JSON.stringify(value, null, 2)}</code>
                 //     </pre>)
+
+                const res = await createForm(value)
+                console.log("create form response : ", res)
             } catch (error) {
                 console.error("Form submission error", error);
                 toast.error("Failed to submit the form. Please try again.");
@@ -74,19 +82,21 @@ export default function MyForm() {
 
 
     const addField = () => {
-        form.setFieldValue('fields', old => [...old, {
-                inputType: "",
-                inputTitle: "",
-                inputPlaceholder: "",
+        form.setFieldValue('schemas', old => [...old, {
+                type: "",
+                title: "",
+                placeholder: "",
                 options: [],
-                required: false,
-                minLength: 0,
-                maxLength: 0
+                conditions: {
+                    required: false,
+                    minLength: 0,
+                    maxLength: 0
+                }
         }])
     };
 
     const removeField = (index) => {
-        form.removeFieldValue('fields', index)
+        form.removeFieldValue('schemas', index)
     }
 
     return (
@@ -140,7 +150,7 @@ export default function MyForm() {
                         />
                         {/* Fields Section */}
                         <div className="space-y-4">
-                            <form.Field name="fields" mode="array">
+                            <form.Field name="schemas" mode="array">
                             {(field) => {
                                 return (
                                     <>

@@ -34,7 +34,7 @@ const CONDITIONS = [
     {
         id: 1,
         title: 'Required',
-        name: 'required',
+        name: 'conditions.required',
         type: 'select',
         options: [
             {label: 'True', value: true},
@@ -44,13 +44,13 @@ const CONDITIONS = [
     {
         id: 2,
         title: 'Minimum Length',
-        name: 'minLength',
+        name: 'conditions.minLength',
         type: 'number',
     },
     {
         id: 3,
         title: 'Maximum Length',
-        name: 'maxLength',
+        name: 'conditions.maxLength',
         type: 'number',
     },
 ]
@@ -100,7 +100,7 @@ export default function ConditionsEditor({ form, index }) {
                                 <TableCell className="font-medium">{condition.title}</TableCell>
                                 <TableCell>{
                                     <form.Field
-                                        name={`fields[${index}].${condition.name}`}
+                                        name={`schemas[${index}].${condition.name}`}
                                         children={(field) => {
                                             const isInvalid =
                                                 field.state.meta.isTouched && !field.state.meta.isValid

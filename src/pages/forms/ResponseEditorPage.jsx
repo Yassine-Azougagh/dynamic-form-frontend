@@ -1,9 +1,12 @@
 "use client"
 import { FieldGroup } from "@/components/ui/field"
+import { getFormById } from "@/services/form.service"
+import { submitFormResponse } from "@/services/response.service"
 import {
     useForm
 } from "@tanstack/react-form"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { useParams } from "react-router"
 import {
     toast
 } from "sonner"
@@ -82,19 +85,23 @@ const mockFormData = {
 
 
 const formSchema = z.object({
+    formId: z.string(),
     fields: z.array(
         z.object({
             id: z.string(),
+            title: z.string(),
             value: z.string()
         }
         ))
 });
 
 export default function ResponseEditorPage() {
-
+    const { id } = useParams();
+    const [formDto, setFormDto] = useState(null)
 
     const form = useForm({
         defaultValues: {
+            formId: '',
             fields: []
         },
         onSubmit: async ({ value }) => {
@@ -104,6 +111,9 @@ export default function ResponseEditorPage() {
                 toast(<pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
                 //         <code className="text-white">{JSON.stringify(value, null, 2)}</code>
                 //     </pre>)
+
+                const res = await submitFormResponse(value)
+                console.log("create submission response : ", res)
             } catch (error) {
                 console.error("Form submission error", error);
                 toast.error("Failed to submit the form. Please try again.");
@@ -114,14 +124,22 @@ export default function ResponseEditorPage() {
         }
     })
 
-    useEffect(() => {
-        mockFormData.fields.forEach(field => {
+    const init = async () => {
+        const f = await getFormById(id)
+
+        setFormDto(f)
+        form.setFieldValue('formId', f.id)
+        f.schema.forEach(field => {
             console.log("ids are : ", field)
             form.setFieldValue('fields', old => [...old, {
                 id: field.id,
+                title: field.title,
                 value: ''
             }])
         })
+    }
+    useEffect( () => {
+        init()
     }, [])
 
 
@@ -134,7 +152,7 @@ export default function ResponseEditorPage() {
                 {/* Header */}
                 <div className="flex justify-center items-center mb-6 text-center">
                     <div>
-                        <h1 className="text-4xl font-bold">{mockFormData.title}</h1>
+                        <h1 className="text-4xl font-bold">{formDto?.title}</h1>
                     </div>
 
                 </div>
@@ -152,16 +170,16 @@ export default function ResponseEditorPage() {
                                 return (
                                     <>
                                         {field.state.value.length > 0 ?
-                                            field.state.value.map((_, i) => {
+                                            formDto && field.state.value.map((_, i) => {
                                                 return (
                                                     <>
                                                         <div className="grid grid-cols-3">
-                                                            <label className="font-medium">{mockFormData.fields[i].inputTitle}</label>
+                                                            <label className="font-medium">{formDto.schema[i].title}</label>
                                                             <div className="col-span-2">
                                                                 <form.Field key={i} name={`fields[${i}].value`}>
                                                                     {(subField) => {
                                                                         const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
-                                                                        switch (mockFormData.fields[i].inputType) {
+                                                                        switch (formDto.schema[i].type) {
                                                                             case "text":
                                                                             case "number":
                                                                                 return (
@@ -172,7 +190,7 @@ export default function ResponseEditorPage() {
                                                                                         type='text'
                                                                                         value={subField.state.value}
                                                                                         onBlur={subField.handleBlur}
-                                                                                        onChange={(e) => subField.handleChange(mockFormData.fields[i].inputType === 'text' ?
+                                                                                        onChange={(e) => subField.handleChange(formDto.schema[i].type === 'text' ?
                                                                                             e.target.value : valueAsNumber)}
                                                                                         aria-invalid={isInvalid}
                                                                                         autoComplete="off"
@@ -181,7 +199,7 @@ export default function ResponseEditorPage() {
 
                                                                             case 'radio': return (
                                                                                 <div className="flex gap-2">
-                                                                                    {mockFormData.fields[i].options.map((option) => (
+                                                                                    {formDto.schema[i].options.map((option) => (
                                                                                         <div key={option.title} className="flex gap-2">
                                                                                             <input
                                                                                                 key={subField.name}
@@ -209,7 +227,7 @@ export default function ResponseEditorPage() {
                                                                                 return (
                                                                                     <div className="flex gap-2">
                                                                                         {
-                                                                                            mockFormData.fields[i].options.map((option) => (
+                                                                                            formDto.schema[i].options.map((option) => (
                                                                                                 <div key={option.title} className="flex gap-0.5">
                                                                                                     <input
                                                                                                         type="checkbox"
@@ -242,7 +260,7 @@ export default function ResponseEditorPage() {
                                                                                         </SelectTrigger>
                                                                                         <SelectContent position="item-aligned">
                                                                                             <SelectSeparator />
-                                                                                            {mockFormData.fields[i].options.map((option) => (
+                                                                                            {formDto.schema[i].options.map((option) => (
                                                                                                 <SelectItem
                                                                                                     key={option.title}
                                                                                                     value={option.value}

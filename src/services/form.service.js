@@ -1,20 +1,17 @@
 import api from "./api";
 
 export const getForms = async () => {
-    const res = await api.get("/forms");
+    const res = await api.get("/form/list");
     return res.data;
 };
 
 export const getFormById = async (id) => {
-    const res = await api.get(`/forms/${id}`);
+    const res = await api.get(`/form/${id}`);
     return res.data;
 };
 
 export const createForm = async (form) => {
-    const res = await api.post("/forms", {
-        title: form.title,
-        schema: form.schema,
-    });
+    const res = await api.post("/form", form);
     return res.data;
 };
 

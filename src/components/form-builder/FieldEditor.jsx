@@ -47,7 +47,7 @@ export default function FieldEditor({ form, field, onDelete, index }) {
 
             {/* Grid */}
             <div className="grid grid-cols-2 gap-4">
-                <form.Field key={`input-type-${index}`} name={`fields[${index}].inputType`}
+                <form.Field key={`input-type-${index}`} name={`schemas[${index}].type`}
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
@@ -88,7 +88,7 @@ export default function FieldEditor({ form, field, onDelete, index }) {
                 )
               }}
             />            
-            <form.Field key={`input-title-${index}`} name={`fields[${index}].inputTitle`}
+            <form.Field key={`input-title-${index}`} name={`schemas[${index}].title`}
                             children={(field) => {
                                 const isInvalid =
                                     field.state.meta.isTouched && !field.state.meta.isValid
@@ -113,7 +113,7 @@ export default function FieldEditor({ form, field, onDelete, index }) {
                             }}
                         />
             <div className="col-span-2">
-                <form.Field key={`input-placeholder-${index}`} name={`fields[${index}].inputPlaceholder`}
+                <form.Field key={`input-placeholder-${index}`} name={`schemas[${index}].placeholder`}
                             children={(field) => {
                                 const isInvalid =
                                     field.state.meta.isTouched && !field.state.meta.isValid
