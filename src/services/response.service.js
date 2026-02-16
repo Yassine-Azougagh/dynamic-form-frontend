@@ -5,6 +5,12 @@ export const submitFormResponse = async ( answers) => {
     return res.data;
 };
 
+export const validateFormResponse = async ( formId) => {
+    const res = await api.post(`/submission/validate?formId=${formId}`,null);
+    return res.data;
+};
+
+
 export const getResponsesByForm = async (formId) => {
     const res = await api.get(`/submission/${formId}`);
     return res.data;

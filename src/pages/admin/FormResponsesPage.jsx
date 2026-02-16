@@ -15,10 +15,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { getResponses } from "@/services/response.service";
 import { Check, Delete, MoreHorizontalIcon, Plus, View } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { getForms } from "../../services/form.service";
 
 
 const tableData = [
@@ -92,11 +92,11 @@ const tableData = [
 
 
 export default function AdminResponsesPage() {
-    const [forms, setForms] = useState([]);
+    const [responses, setResponses] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
-        getForms().then(setForms);
+        getResponses().then(setResponses);
     }, []);
 
     return (
@@ -116,18 +116,16 @@ export default function AdminResponsesPage() {
                         <TableHead>Title</TableHead>
                         <TableHead>Created At</TableHead>
                         <TableHead>Created By</TableHead>
-                        <TableHead>Form Name</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tableData.map(response => 
+                    {responses.map(response => 
                         (<TableRow key={response.id}>
-                            <TableCell className="font-medium">{response.title}</TableCell>
+                            <TableCell className="font-medium">{response.formTitle}</TableCell>
                             <TableCell>{response.createdAt}</TableCell>
                             <TableCell>{response.createdBy}</TableCell>
-                            <TableCell>{response.formName}</TableCell>
                             <TableCell><StatusComponent status={response.status}/></TableCell>
                             <TableCell className="text-right">
                                 <DropdownMenu>

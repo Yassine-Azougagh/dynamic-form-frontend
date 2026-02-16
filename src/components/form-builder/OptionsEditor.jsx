@@ -21,7 +21,7 @@ import {
 } from "/src/components/ui/input";
 export default function OptionsEditor({ form, index }) {
 
-    const addOption = (index) => {
+    const addOption = () => {
         form.setFieldValue(`schemas[${index}].options`, old => [...old, { title: '', value: '' }])
     };
     return (

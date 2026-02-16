@@ -1,7 +1,7 @@
 "use client"
 import { FieldError, FieldGroup } from "@/components/ui/field"
 import { getFormById } from "@/services/form.service"
-import { submitFormResponse } from "@/services/response.service"
+import { submitFormResponse, validateFormResponse } from "@/services/response.service"
 import {
     useForm
 } from "@tanstack/react-form"
@@ -82,6 +82,24 @@ const mockFormData = {
 };
 
 
+const customValidators = (isRequired, minLength, maxLength, fieldType) => {
+    switch (fieldType) {
+        case 'text': return {
+            onChange: z
+                .string(isRequired)
+                .min(minLength)
+                .max(maxLength)
+        }
+        case 'number': return {
+            onChange: z
+                .number(isRequired, "This field should be a number")
+        }
+        default: return {
+            onChange: z
+                .string(isRequired)
+        }
+    }
+}
 
 const formSchema = z.object({
     formId: z.string(),
@@ -89,7 +107,7 @@ const formSchema = z.object({
         z.object({
             id: z.string(),
             title: z.string(),
-            value: z.string()
+            value: z.any()
         }
         ))
 });
@@ -121,6 +139,9 @@ export default function ResponseEditorPage() {
                 console.error("Form submission error", error);
                 toast.error("Failed to submit the form. Please try again.");
             }
+        },
+        validators: {
+            onChange: formSchema
         }
     })
 
@@ -156,7 +177,7 @@ export default function ResponseEditorPage() {
             form.setFieldValue('fields', old => [...old, {
                 id: field.id,
                 title: field.title,
-                value: ''
+                value: field.type === 'number' ? 0 : ''
             }])
 
 
@@ -171,6 +192,16 @@ export default function ResponseEditorPage() {
 
 
 
+    const validateResponse = async () => {
+        try{
+            const res = await validateFormResponse(formDto?.id)
+            console.log("validate responee * ****")
+            console.log(res)
+        }catch(e){
+            console.error("Exception occured")
+            console.error(e)
+        }
+    }
     return (
 
         <div className="min-h-screen  p-8">
@@ -199,10 +230,11 @@ export default function ResponseEditorPage() {
                                         {field.state.value.length > 0 ?
                                             formDto && field.state.value.map((_, i) => {
                                                 const isRequired = conditions.get(formDto.schema[i].id).required
-                                                const maxLength = conditions.get(formDto.schema[i].id).maxLength > 0 ? 
-                                                            conditions.get(formDto.schema[i].id).maxLength : 
-                                                            MAX_VALUE_LENGTH
+                                                const maxLength = conditions.get(formDto.schema[i].id).maxLength > 0 ?
+                                                    conditions.get(formDto.schema[i].id).maxLength :
+                                                    MAX_VALUE_LENGTH
                                                 const minLength = isRequired ? MIN_VALUE_LENGTH : conditions.get(formDto.schema[i].id).minLength
+                                                const fieldType = formDto.schema[i].type
                                                 return (
                                                     <>
                                                         <div className="grid grid-cols-3">
@@ -211,13 +243,7 @@ export default function ResponseEditorPage() {
                                                                 <form.Field
                                                                     key={i}
                                                                     name={`fields[${i}].value`}
-                                                                    validators={{
-                                                                        onChange: z
-                                                                        .string(isRequired)
-                                                                        .min(minLength)
-                                                                        .max(maxLength)
-                                                                        .check()
-                                                                    }}
+                                                                    validators={customValidators(isRequired, minLength, maxLength, fieldType)}
                                                                 >
                                                                     {(subField) => {
                                                                         const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
@@ -230,11 +256,12 @@ export default function ResponseEditorPage() {
                                                                                             key={`${subField.name}-${i}`}
                                                                                             id={subField.name}
                                                                                             name={subField.name}
-                                                                                            type='text'
+                                                                                            type={fieldType}
                                                                                             value={subField.state.value}
                                                                                             onBlur={subField.handleBlur}
                                                                                             onChange={(e) => subField.handleChange(
-                                                                                                e.target.value)}
+                                                                                                fieldType === 'text' ? e.target.value : e.target.valueAsNumber
+                                                                                            )}
                                                                                             aria-invalid={isInvalid}
                                                                                             autoComplete="off"
                                                                                         />
@@ -258,13 +285,17 @@ export default function ResponseEditorPage() {
                                                                                                 onChange={(e) => subField.handleChange(e.target.value)}
                                                                                             />
                                                                                             <label>{option.title}</label>
+                                                                                            {/* Display errors */}
+                                                                                            {isInvalid && (
+                                                                                                <FieldError errors={subField.state.meta.errors} />
+                                                                                            )}
                                                                                         </div>
                                                                                     ))}
 
                                                                                 </div>
                                                                             )
                                                                             case 'checkbox': {
-                                                                                const values = subField.state.value.split(",") || []
+                                                                                const values = subField.state.value && subField.state.value.split(",") || []
                                                                                 const toggleValue = (val) => {
                                                                                     const nextValue = values.includes(val)
                                                                                         ? values.filter((v) => v !== val)
@@ -287,6 +318,10 @@ export default function ResponseEditorPage() {
                                                                                                 </div>
                                                                                             ))
                                                                                         }
+                                                                                        {/* Display errors */}
+                                                                                        {isInvalid && (
+                                                                                            <FieldError errors={subField.state.meta.errors} />
+                                                                                        )}
                                                                                     </div>
                                                                                 )
 
@@ -294,30 +329,37 @@ export default function ResponseEditorPage() {
                                                                             }
                                                                             case "select":
                                                                                 return (
-                                                                                    <Select
-                                                                                        name={subField.name}
-                                                                                        value={subField.state.value}
-                                                                                        onValueChange={(e) => subField.handleChange(e)}
-                                                                                    >
-                                                                                        <SelectTrigger
-                                                                                            id="form-tanstack-select-language"
-                                                                                            aria-invalid={isInvalid}
-                                                                                            className="w-full"
+                                                                                    <>
+                                                                                        <Select
+                                                                                            name={subField.name}
+                                                                                            value={subField.state.value}
+                                                                                            onValueChange={(e) => subField.handleChange(e)}
                                                                                         >
-                                                                                            <SelectValue />
-                                                                                        </SelectTrigger>
-                                                                                        <SelectContent position="item-aligned">
-                                                                                            <SelectSeparator />
-                                                                                            {formDto.schema[i].options.map((option) => (
-                                                                                                <SelectItem
-                                                                                                    key={option.title}
-                                                                                                    value={option.value}
-                                                                                                >
-                                                                                                    {option.title}
-                                                                                                </SelectItem>
-                                                                                            ))}
-                                                                                        </SelectContent>
-                                                                                    </Select>)
+                                                                                            <SelectTrigger
+                                                                                                id="form-tanstack-select-language"
+                                                                                                aria-invalid={isInvalid}
+                                                                                                className="w-full"
+                                                                                            >
+                                                                                                <SelectValue />
+                                                                                            </SelectTrigger>
+                                                                                            <SelectContent position="item-aligned">
+                                                                                                <SelectSeparator />
+                                                                                                {formDto.schema[i].options.map((option) => (
+                                                                                                    <SelectItem
+                                                                                                        key={option.title}
+                                                                                                        value={option.value}
+                                                                                                    >
+                                                                                                        {option.title}
+                                                                                                    </SelectItem>
+                                                                                                ))}
+                                                                                            </SelectContent>
+                                                                                        </Select>
+                                                                                        {/* Display errors */}
+                                                                                        {isInvalid && (
+                                                                                            <FieldError errors={subField.state.meta.errors} />
+                                                                                        )}
+                                                                                    </>
+                                                                                )
 
                                                                             default:
                                                                                 return null;
@@ -339,11 +381,12 @@ export default function ResponseEditorPage() {
                             }}
                         </form.Field>
                         <div className="grid grid-cols-2 gap-2">
-                            <Button type="submit">Submit</Button>
-                            <Button className='bg-white text-black hover:text-white hover:bg-gray-400'>Save draft</Button>
+                            <Button className='bg-white text-black hover:text-white hover:bg-gray-400' type="submit">Save draft</Button>
                         </div>
                     </FieldGroup>
                 </form>
+                                            <Button onClick={validateResponse} >Submit</Button>
+
             </div>
         </div >
     )
