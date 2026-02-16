@@ -1,5 +1,5 @@
 "use client"
-import { FieldGroup } from "@/components/ui/field"
+import { FieldError, FieldGroup } from "@/components/ui/field"
 import { getFormById } from "@/services/form.service"
 import { submitFormResponse } from "@/services/response.service"
 import {
@@ -27,7 +27,6 @@ import {
     SelectTrigger,
     SelectValue
 } from "/src/components/ui/select"
-
 const mockFormData = {
     title: "User Registration Form",
     fields: [
@@ -98,6 +97,10 @@ const formSchema = z.object({
 export default function ResponseEditorPage() {
     const { id } = useParams();
     const [formDto, setFormDto] = useState(null)
+    const [conditions, setConditions] = useState(new Map())
+
+    const MIN_VALUE_LENGTH = 3
+    const MAX_VALUE_LENGTH = 200
 
     const form = useForm({
         defaultValues: {
@@ -118,11 +121,30 @@ export default function ResponseEditorPage() {
                 console.error("Form submission error", error);
                 toast.error("Failed to submit the form. Please try again.");
             }
-        },
-        validators: {
-            onChange: formSchema
         }
     })
+
+    function buildValidator(rules) {
+        console.log("rules are : ", rules)
+        console.log("entering build validator")
+        console.log(rules)
+
+        if (!rules) return undefined
+
+        if (rules.required && !value) {
+            return 'This field is required'
+        }
+
+        if (rules.minLength && value.length < rules.minLength) {
+            return `Minimum length is ${rules.minLength}`
+        }
+
+        if (rules.maxLength && value.length > rules.maxLength) {
+            return `Maximum length is ${rules.maxLength}`
+        }
+
+        return undefined
+    }
 
     const init = async () => {
         const f = await getFormById(id)
@@ -136,9 +158,14 @@ export default function ResponseEditorPage() {
                 title: field.title,
                 value: ''
             }])
+
+
+
+            setConditions((old) => old.set(field.id, field.conditions))
         })
+
     }
-    useEffect( () => {
+    useEffect(() => {
         init()
     }, [])
 
@@ -171,30 +198,51 @@ export default function ResponseEditorPage() {
                                     <>
                                         {field.state.value.length > 0 ?
                                             formDto && field.state.value.map((_, i) => {
+                                                const isRequired = conditions.get(formDto.schema[i].id).required
+                                                const maxLength = conditions.get(formDto.schema[i].id).maxLength > 0 ? 
+                                                            conditions.get(formDto.schema[i].id).maxLength : 
+                                                            MAX_VALUE_LENGTH
+                                                const minLength = isRequired ? MIN_VALUE_LENGTH : conditions.get(formDto.schema[i].id).minLength
                                                 return (
                                                     <>
                                                         <div className="grid grid-cols-3">
                                                             <label className="font-medium">{formDto.schema[i].title}</label>
                                                             <div className="col-span-2">
-                                                                <form.Field key={i} name={`fields[${i}].value`}>
+                                                                <form.Field
+                                                                    key={i}
+                                                                    name={`fields[${i}].value`}
+                                                                    validators={{
+                                                                        onChange: z
+                                                                        .string(isRequired)
+                                                                        .min(minLength)
+                                                                        .max(maxLength)
+                                                                        .check()
+                                                                    }}
+                                                                >
                                                                     {(subField) => {
                                                                         const isInvalid = subField.state.meta.isTouched && !subField.state.meta.isValid
                                                                         switch (formDto.schema[i].type) {
                                                                             case "text":
                                                                             case "number":
                                                                                 return (
-                                                                                    <Input
-                                                                                        key={`${subField.name}-${i}`}
-                                                                                        id={subField.name}
-                                                                                        name={subField.name}
-                                                                                        type='text'
-                                                                                        value={subField.state.value}
-                                                                                        onBlur={subField.handleBlur}
-                                                                                        onChange={(e) => subField.handleChange(formDto.schema[i].type === 'text' ?
-                                                                                            e.target.value : valueAsNumber)}
-                                                                                        aria-invalid={isInvalid}
-                                                                                        autoComplete="off"
-                                                                                    />
+                                                                                    <>
+                                                                                        <Input
+                                                                                            key={`${subField.name}-${i}`}
+                                                                                            id={subField.name}
+                                                                                            name={subField.name}
+                                                                                            type='text'
+                                                                                            value={subField.state.value}
+                                                                                            onBlur={subField.handleBlur}
+                                                                                            onChange={(e) => subField.handleChange(
+                                                                                                e.target.value)}
+                                                                                            aria-invalid={isInvalid}
+                                                                                            autoComplete="off"
+                                                                                        />
+                                                                                        {/* Display errors */}
+                                                                                        {isInvalid && (
+                                                                                            <FieldError errors={subField.state.meta.errors} />
+                                                                                        )}
+                                                                                    </>
                                                                                 );
 
                                                                             case 'radio': return (

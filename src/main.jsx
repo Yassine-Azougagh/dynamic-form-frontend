@@ -8,13 +8,15 @@ import FormEditPage from "./pages/admin/FormEditPage.jsx";
 import { default as AdminResponsesPage, default as FormResponsesPage } from "./pages/admin/FormResponsesPage.jsx";
 import FormView from './pages/admin/FormView.jsx';
 import Login from './pages/auth/login.jsx';
+import Signup from './pages/auth/signup.jsx';
 import Unauthorized from './pages/auth/unauthorized.jsx';
 import ResponseEditorPage from './pages/forms/ResponseEditorPage.jsx';
 import UserFormListPage from './pages/forms/UserFormListPage.jsx';
 import AdminResponseView from './pages/shared/FormResponseView';
 import RouterGuard from './router.guard.jsx';
-import Signup from './pages/auth/signup.jsx';
 
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import { formDevtoolsPlugin } from '@tanstack/react-form-devtools';
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>
         <Routes>
@@ -43,5 +45,10 @@ createRoot(document.getElementById('root')).render(
             <Route path="*" element={<h2>404 – Page not found</h2>} />
 
         </Routes>
+        <TanStackDevtools
+        initialIsOpen={false} 
+            position="bottom-right" 
+        plugins={[formDevtoolsPlugin()]}
+        />
     </BrowserRouter>,
 )
