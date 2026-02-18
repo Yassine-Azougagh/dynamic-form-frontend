@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router";
 import api from "./api";
 
 /**
@@ -86,3 +87,10 @@ export const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
 };
+
+
+export const handleLogout = (navigate) => {
+  console.warn("***** You are loging out *******")
+  localStorage.clear()
+  navigate('/login')
+}

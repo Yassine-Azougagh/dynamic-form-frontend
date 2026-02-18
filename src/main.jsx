@@ -17,6 +17,7 @@ import RouterGuard from './router.guard.jsx';
 
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { formDevtoolsPlugin } from '@tanstack/react-form-devtools';
+import Profile from './pages/shared/Profile.jsx';
 createRoot(document.getElementById('root')).render(
     <BrowserRouter>
         <Routes>
@@ -38,6 +39,8 @@ createRoot(document.getElementById('root')).render(
                     <Route path="user/forms/list" element={<UserFormListPage />} />
                     <Route path="user/responses/:id/edit" element={<ResponseEditorPage />} />
                 </Route>
+
+                <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />

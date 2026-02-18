@@ -1,7 +1,11 @@
 import api from "./api";
 
-export const getForms = async () => {
-    const res = await api.get("/form/list");
+export const getForms = async (page, size, sortBy) => {
+    const res = await api.get(`/form/list?page=${page}&size=${size}&sortBy=${sortBy}`);
+    return res.data;
+};
+export const getUserForms = async (page, size, sortBy) => {
+    const res = await api.get(`/form/user/list?page=${page}&size=${size}&sortBy=${sortBy}`);
     return res.data;
 };
 

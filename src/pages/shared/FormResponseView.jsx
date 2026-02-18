@@ -110,7 +110,7 @@ export default function AdminResponseView() {
                 </button>
             </header>
 
-            <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg'>
+            <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg '>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Question</TableHead>

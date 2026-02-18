@@ -95,8 +95,7 @@ const customValidators = (isRequired, minLength, maxLength, fieldType) => {
                 .number(isRequired, "This field should be a number")
         }
         default: return {
-            onChange: z
-                .string(isRequired)
+            onChange: isRequired ? z.string().min(1,{message: "One item should be selected at least."}) : z.string()
         }
     }
 }
@@ -193,11 +192,11 @@ export default function ResponseEditorPage() {
 
 
     const validateResponse = async () => {
-        try{
+        try {
             const res = await validateFormResponse(formDto?.id)
             console.log("validate responee * ****")
             console.log(res)
-        }catch(e){
+        } catch (e) {
             console.error("Exception occured")
             console.error(e)
         }
@@ -382,11 +381,10 @@ export default function ResponseEditorPage() {
                         </form.Field>
                         <div className="grid grid-cols-2 gap-2">
                             <Button className='bg-white text-black hover:text-white hover:bg-gray-400' type="submit">Save draft</Button>
+                            <Button onClick={validateResponse} type="button">Submit</Button>
                         </div>
                     </FieldGroup>
                 </form>
-                                            <Button onClick={validateResponse} >Submit</Button>
-
             </div>
         </div >
     )

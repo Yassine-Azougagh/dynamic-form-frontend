@@ -13,12 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getForms } from "@/services/form.service";
-import { Edit, MoreHorizontalIcon, Plus, View } from "lucide-react";
+import { getUserForms } from "@/services/form.service";
+import { Edit, MoreHorizontalIcon, View } from "lucide-react";
 import { useEffect, useState } from "react";
+import ResponsivePagination from 'react-responsive-pagination';
+import { combine, dropEllipsis, dropNav } from 'react-responsive-pagination/narrowBehaviour';
 import { useNavigate } from "react-router";
-
-
 const tableData = [
   {
     id: "13f3fc2f-a699-4da4-976d-3e2eb35ce128",
@@ -132,60 +132,81 @@ const tableData = [
 
 
 export default function UserFormListPage() {
-    const [forms, setForms] = useState([]);
-    const navigate = useNavigate();
+  const [forms, setForms] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        getForms().then(setForms);
-    }, []);
+  useEffect(() => {
+    getUserForms(currentPage, 10, 'createdAt').then((value) => {
+      setForms(value.list)
+      setCurrentPage(value.page)
+      const totalItems = value.fullSize ? value.fullSize : 0
+      const pageSize = value.size ? value.size : 10
+      setTotalPages(totalItems/pageSize)
+    });
+  }, [currentPage]);
 
-    return (
-        <div>
-            <header className="pb-5 flex justify-center items-center flex-col gap-2">
-                <div className="text-6xl uppercase font-bold">Forms</div>
+  const handlePageChange = (value) => {
+    setCurrentPage(value)
 
-                <button className="border-2 border-black rounded-2xl shadow-2xl flex p-2"
-                    onClick={() => navigate("/admin/forms/new")}>
-                    <Plus/> Create New Form
-                </button>
-            </header>
+  }
 
-            <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg'>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead>Created By</TableHead>
-                        <TableHead>Version</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {forms.map(form => 
-                        (<TableRow key={form.id}>
-                            <TableCell className="font-medium">{form.title}</TableCell>
-                            <TableCell>{form.createdAt}</TableCell>
-                            <TableCell>{form.createdBy}</TableCell>
-                            <TableCell>v.{form.version}</TableCell>
-                            <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="size-8">
-                                            <MoreHorizontalIcon />
-                                            <span className="sr-only">Open menu</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => navigate("/admin/responses/"+ 1 +"/view")}><View/> View</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => navigate("/user/responses/"+ form.id +"/edit")}><Edit/> Answer</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
-                        </TableRow>)
-                    )}
-                </TableBody>
-            </Table>
-            {/* <ul>
+  return (
+    <div className="">
+      <header className="pb-5 flex justify-center items-center flex-col gap-2">
+        <div className="text-6xl uppercase font-bold">Forms</div>
+        <div>Your admin requested you to answer the following forms</div>
+      </header>
+
+      <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg w-6xl '>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Created By</TableHead>
+            <TableHead>Version</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {forms.map(form =>
+          (<TableRow key={form.id}>
+            <TableCell className="font-medium">{form.title}</TableCell>
+            <TableCell>{form.createdAt}</TableCell>
+            <TableCell>{form.createdBy}</TableCell>
+            <TableCell>v.{form.version}</TableCell>
+            <TableCell className="text-right">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="size-8">
+                    <MoreHorizontalIcon />
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => navigate("/admin/responses/" + 1 + "/view")}><View /> View</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/user/responses/" + form.id + "/edit")}><Edit /> Answer</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>)
+          )}
+        </TableBody>
+      </Table>
+      <ResponsivePagination
+      total={totalPages}
+      current={currentPage}
+      onPageChange={(value) => setCurrentPage(value-1)}
+      narrowBehaviour={combine(dropNav, dropEllipsis)}
+      containerClassName="flex justify-center gap-1"
+      pageItemClassName="inline-flex items-center rounded-md border text-sm"
+      activeItemClassName="border-blue-800 bg-blue-800 text-white shadow-sm"
+      inactiveItemClassName="border-slate-600 text-slate-400 shadow-sm hover:bg-blue-800 hover:text-white hover:shadow-lg"
+      disabledItemClassName="pointer-events-none border-slate-600 text-slate-400 opacity-50"
+      pageLinkClassName="px-3 py-2"
+    />
+      {/* <ul>
                 {forms.map(form => (
                     <li key={form.id}>
                         <strong>{form.title}</strong>
@@ -202,6 +223,6 @@ export default function UserFormListPage() {
                     </li>
                 ))}
             </ul> */}
-        </div>
-    );
+    </div>
+  );
 }

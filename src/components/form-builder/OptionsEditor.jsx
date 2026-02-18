@@ -38,6 +38,7 @@ export default function OptionsEditor({ form, index }) {
                                 <button
                                     onClick={addOption}
                                     className="text-grey-500 hover:text-black-700"
+                                    type="button"
                                 >
                                     Add
                                 </button>

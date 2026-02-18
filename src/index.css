@@ -122,6 +122,6 @@
   }
 }
 
-button {
+button, a {
   cursor: pointer;
 }

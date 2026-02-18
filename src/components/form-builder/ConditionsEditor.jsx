@@ -79,6 +79,7 @@ export default function ConditionsEditor({ form, index }) {
                 <button
                     onClick={addCondition}
                     className="text-grey-500 hover:text-black-700"
+                    type="button"
                 >
                     Add
                 </button>

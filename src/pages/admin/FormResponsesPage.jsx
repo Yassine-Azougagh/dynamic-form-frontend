@@ -102,15 +102,11 @@ export default function AdminResponsesPage() {
     return (
         <div>
             <header className="pb-5 flex justify-center items-center flex-col gap-2">
-                <div className="text-6xl uppercase font-bold">Forms</div>
+                <div className="text-5xl uppercase font-bold">Submissions</div>
 
-                <button className="border-2 border-black rounded-2xl shadow-2xl flex p-2"
-                    onClick={() => navigate("/admin/forms/new")}>
-                    <Plus/> Create New Form
-                </button>
             </header>
 
-            <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg'>
+            <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg w-6xl'>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Title</TableHead>
