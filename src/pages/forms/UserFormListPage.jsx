@@ -147,10 +147,7 @@ export default function UserFormListPage() {
     });
   }, [currentPage]);
 
-  const handlePageChange = (value) => {
-    setCurrentPage(value)
 
-  }
 
   return (
     <div className="">
@@ -170,7 +167,8 @@ export default function UserFormListPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {forms.map(form =>
+          {
+          forms.length ? forms.map(form =>
           (<TableRow key={form.id}>
             <TableCell className="font-medium">{form.title}</TableCell>
             <TableCell>{form.createdAt}</TableCell>
@@ -191,12 +189,20 @@ export default function UserFormListPage() {
               </DropdownMenu>
             </TableCell>
           </TableRow>)
-          )}
+          ) : 
+          <TableRow>
+            <TableCell colSpan={5}>
+              <div className="text-center text-1xl p-5 italic">
+                No form is published currently, check later !
+              </div></TableCell>
+          </TableRow>
+          
+        }
         </TableBody>
       </Table>
       <ResponsivePagination
       total={totalPages}
-      current={currentPage}
+      current={currentPage+1}
       onPageChange={(value) => setCurrentPage(value-1)}
       narrowBehaviour={combine(dropNav, dropEllipsis)}
       containerClassName="flex justify-center gap-1"
@@ -206,23 +212,6 @@ export default function UserFormListPage() {
       disabledItemClassName="pointer-events-none border-slate-600 text-slate-400 opacity-50"
       pageLinkClassName="px-3 py-2"
     />
-      {/* <ul>
-                {forms.map(form => (
-                    <li key={form.id}>
-                        <strong>{form.title}</strong>
-
-                        <div>
-                            <button onClick={() => navigate(`/admin/forms/${form.id}/edit`)}>
-                                Edit
-                            </button>
-
-                            <button onClick={() => navigate(`/admin/forms/${form.id}/responses`)}>
-                                Responses
-                            </button>
-                        </div>
-                    </li>
-                ))}
-            </ul> */}
     </div>
   );
 }

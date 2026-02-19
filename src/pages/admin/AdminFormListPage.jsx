@@ -1,25 +1,26 @@
 import { StatusComponent } from "@/components/StatusComponent";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { Delete, Edit, MoreHorizontalIcon, Plus, Send, View } from "lucide-react";
 import { useEffect, useState } from "react";
+import ResponsivePagination from 'react-responsive-pagination';
+import { combine, dropEllipsis, dropNav } from 'react-responsive-pagination/narrowBehaviour';
 import { useNavigate } from "react-router";
-import { getForms } from "../../services/form.service";
-
+import { getAdminForms } from "../../services/form.service";
 
 const tableData = [
   {
@@ -134,83 +135,93 @@ const tableData = [
 
 
 export default function AdminFormListPage() {
-    const [forms, setForms] = useState([]);
-    const navigate = useNavigate();
+  const [forms, setForms] = useState([]);
+  const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
+  useEffect(() => {
+    getAdminForms(currentPage, 10, 'createdAt').then((value) => {
+      setForms(value.list)
+      setCurrentPage(value.page)
+      const totalItems = value.fullSize ? value.fullSize : 0
+      const pageSize = value.size ? value.size : 10
+      setTotalPages(totalItems / pageSize)
+    });
+  }, [currentPage]);
 
-    useEffect(() => {
-        getForms().then(setForms);
-    }, []);
+  return (
+    <div>
+      <header className="pb-5 flex justify-center items-center flex-col gap-2">
+        <div className="text-6xl uppercase font-bold">Forms</div>
 
-    return (
-        <div>
-            <header className="pb-5 flex justify-center items-center flex-col gap-2">
-                <div className="text-6xl uppercase font-bold">Forms</div>
+        <button className="border-2 border-black rounded-2xl shadow-2xl flex p-2"
+          onClick={() => navigate("/admin/forms/new")}>
+          <Plus /> Create New Form
+        </button>
+      </header>
 
-                <button className="border-2 border-black rounded-2xl shadow-2xl flex p-2"
-                    onClick={() => navigate("/admin/forms/new")}>
-                    <Plus/> Create New Form
-                </button>
-            </header>
-
-            <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg w-6xl'>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Created At</TableHead>
-                        <TableHead>Created By</TableHead>
-                        <TableHead>Version</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {forms.map(form => 
-                        (<TableRow key={form.id}>
-                            <TableCell className="font-medium">{form.title}</TableCell>
-                            <TableCell>{form.createdAt}</TableCell>
-                            <TableCell>{form.createdBy}</TableCell>
-                            <TableCell>v.{form.version}</TableCell>
-                            <TableCell><StatusComponent status={form.status}/></TableCell>
-                            <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="size-8">
-                                            <MoreHorizontalIcon />
-                                            <span className="sr-only">Open menu</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => navigate("/admin/forms/"+ form.id +"/view")}><View/> View</DropdownMenuItem>
-                                        <DropdownMenuItem><Edit/> Edit</DropdownMenuItem>
-                                        <DropdownMenuItem><Send/> Publish</DropdownMenuItem>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuItem variant="destructive">
-                                            <Delete/> Delete
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
-                        </TableRow>)
-                    )}
-                </TableBody>
-            </Table>
-            {/* <ul>
-                {forms.map(form => (
-                    <li key={form.id}>
-                        <strong>{form.title}</strong>
-
-                        <div>
-                            <button onClick={() => navigate(`/admin/forms/${form.id}/edit`)}>
-                                Edit
-                            </button>
-
-                            <button onClick={() => navigate(`/admin/forms/${form.id}/responses`)}>
-                                Responses
-                            </button>
-                        </div>
-                    </li>
-                ))}
-            </ul> */}
-        </div>
-    );
+      <Table className='bg-white/40 backdrop-blur-md border border-white/20 shadow-xl rounded-lg w-6xl'>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Created By</TableHead>
+            <TableHead>Version</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {
+            forms.length ? forms.map(form =>
+            (<TableRow key={form.id}>
+              <TableCell className="font-medium">{form.title}</TableCell>
+              <TableCell>{form.createdAt}</TableCell>
+              <TableCell>{form.createdBy}</TableCell>
+              <TableCell>v.{form.version}</TableCell>
+              <TableCell><StatusComponent status={form.status} /></TableCell>
+              <TableCell className="text-right">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontalIcon />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => navigate("/admin/forms/" + form.id + "/view")}><View /> View</DropdownMenuItem>
+                    <DropdownMenuItem><Edit /> Edit</DropdownMenuItem>
+                    <DropdownMenuItem><Send /> Publish</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive">
+                      <Delete /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>)
+            ) :
+              <TableRow>
+                <TableCell colSpan={6}>
+                  <div className="text-center text-1xl p-5 italic">
+                    Create a form to see it here !
+                  </div></TableCell>
+              </TableRow>
+          }
+        </TableBody>
+      </Table>
+      <ResponsivePagination
+        total={totalPages}
+        current={currentPage + 1}
+        onPageChange={(value) => setCurrentPage(value - 1)}
+        narrowBehaviour={combine(dropNav, dropEllipsis)}
+        containerClassName="flex justify-center gap-1"
+        pageItemClassName="inline-flex items-center rounded-md border text-sm"
+        activeItemClassName="border-blue-800 bg-blue-800 text-white shadow-sm"
+        inactiveItemClassName="border-slate-600 text-slate-400 shadow-sm hover:bg-blue-800 hover:text-white hover:shadow-lg"
+        disabledItemClassName="pointer-events-none border-slate-600 text-slate-400 opacity-50"
+        pageLinkClassName="px-3 py-2"
+      />
+    </div>
+  );
 }

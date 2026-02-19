@@ -15,8 +15,7 @@ import {
 import { MoreHorizontalIcon, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { getForms } from "../../services/form.service";
-
+import { getAdminForms } from "../../services/form.service";
 
 const tableData = [
   {
@@ -94,7 +93,9 @@ export default function AdminResponseView() {
     const { id } = useParams();
 
     useEffect(() => {
-        getForms().then(setForms);
+        getAdminForms().then((value) => {
+      setForms(value.list)
+    });
     }, []);
 
     const response = tableData.find(data => data.id == id)

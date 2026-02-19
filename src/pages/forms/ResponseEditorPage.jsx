@@ -272,7 +272,7 @@ export default function ResponseEditorPage() {
                                                                                 );
 
                                                                             case 'radio': return (
-                                                                                <div className="flex gap-2">
+                                                                                <div className="flex flex-col gap-2">
                                                                                     {formDto.schema[i].options.map((option) => (
                                                                                         <div key={option.title} className="flex gap-2">
                                                                                             <input
@@ -284,13 +284,13 @@ export default function ResponseEditorPage() {
                                                                                                 onChange={(e) => subField.handleChange(e.target.value)}
                                                                                             />
                                                                                             <label>{option.title}</label>
-                                                                                            {/* Display errors */}
+                                                                                            
+                                                                                        </div>
+                                                                                    ))}
+                                                                                    {/* Display errors */}
                                                                                             {isInvalid && (
                                                                                                 <FieldError errors={subField.state.meta.errors} />
                                                                                             )}
-                                                                                        </div>
-                                                                                    ))}
-
                                                                                 </div>
                                                                             )
                                                                             case 'checkbox': {
@@ -303,7 +303,7 @@ export default function ResponseEditorPage() {
                                                                                 };
 
                                                                                 return (
-                                                                                    <div className="flex gap-2">
+                                                                                    <div className="flex flex-col gap-2">
                                                                                         {
                                                                                             formDto.schema[i].options.map((option) => (
                                                                                                 <div key={option.title} className="flex gap-0.5">
